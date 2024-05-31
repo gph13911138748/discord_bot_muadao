@@ -1,40 +1,62 @@
+import io
 import discord
-from discord.ext import commands
-import ssl
-import certifi
-import asyncio
 import aiohttp
+from discord.ext import commands
 
-token = "MTI0NTYxNTQ2NTcyODk2NjY2Ng.GGnSpq.-w2G7t3ICIDh4WfY0BOoCjLwSmqhmN4HmOJS2o"
+from cpi import ask_gaianet
+from button import PlayView
+
+
 
 intents = discord.Intents.default()
 intents.message_content = True
 
-bot = commands.Bot(command_prefix='@muadao-testbot', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents)
 
-# 配置 SSL 上下文
-ssl_context = ssl.create_default_context(cafile=certifi.where())
+@bot.command()
+@commands.has_permissions(administrator=True)
+async def synccommands(ctx):
+    await bot.tree.sync()
+    await ctx.send('sync commands finnish')
 
-# 自定义 HTTP 连接器
-connector = aiohttp.TCPConnector(ssl=ssl_context)
+@bot.hybrid_command()
+async def start(ctx):
+    image_url = "https://postimg.cc/jwFbWCYT"
 
-# 在启动 bot 之前设置 aiohttp 的连接器
-async def start_bot():
-    async with aiohttp.ClientSession(connector=connector) as session:
-        bot.http._HTTPClient__session = session
-        await bot.start(token, reconnect=True)
+    welcome_message = '''Hey MUA fam!  Welcome aboard! Feel free to @mua42bot with any questions about MUA DAO. 
 
-# 创建一个新的事件循环
-def main():
-    new_loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(new_loop)
-    try:
-        new_loop.run_until_complete(start_bot())
-    finally:
-        new_loop.run_until_complete(bot.close())
-        new_loop.close()
+We're here to build, HODL, and have a blast together. Dive in, get involved, and let's create more Mua~ Mua~ miracles! '''
+    # await ctx.send(file=image_url)
+    # async with aiohttp.ClientSession() as session: # creates session
+    #     async with session.get(image_url) as resp: # gets image from url
+    #         img = await resp.read() # reads image from response
+    #         with io.BytesIO(img) as file: # converts to file-like object
+    #             await ctx.send(file=discord.File(file, "testimage.png"))
+    #file = discord.File("/Users/gaopenghao/Downloads/rust项目/discord_bot_muadao/muadao.jpg", filename="output.png")
+    new_embed = discord.Embed()
+    new_embed.set_image(url = image_url)
+    await ctx.send(embed = new_embed)
+    await ctx.send(welcome_message, view = PlayView())
 
-if __name__ == "__main__":
-    main()
+@bot.command()
+async def query(ctx, message): # message这部分也需要改进
+    res = await ask_gaianet("muadao", message)
+    print(message)
+    url_suffix= f'''\nEnter the MUA7648 Phase I event now 
+and enjoy up to $500,000 worth of $MUA and $MNT airdrops: https://7648.muaverse.build/'''
+    res = res + url_suffix
+    await ctx.send(res)
+
+# @bot.event
+# async def on_message(message):
+#         # we do not want the bot to reply to itself
+
+#     print(message.content)
+#     # print(bot.user.id)
+#     id = bot.user.id
+#     if message.content.startswith(f'<@{id}>'):
+#         await message.reply('Hello!', mention_author=True)
 
 
+
+bot.run(token)
