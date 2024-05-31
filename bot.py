@@ -94,7 +94,7 @@ async def on_message(message):
     if message.content.startswith(f'<@{id}>'):
         bot_username, command, query = parse_message(message.content)
         res = await ask_gaianet("muadao", query)
-        url_suffix= f'''\nEnter the MUA7648 Phase I event now 
+        url_suffix= f'''\n\nEnter the MUA7648 Phase I event now 
 and enjoy up to $500,000 worth of $MUA and $MNT airdrops: https://7648.muaverse.build/'''
         res = res + url_suffix
         await message.reply(res, mention_author=True)
